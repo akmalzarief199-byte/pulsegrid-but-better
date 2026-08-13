@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PulseGrid — AI Emergency Coordinator v3</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--bg:#070b12;--panel:#0d131d;--panel2:#101925;--line:#202c3b;--text:#edf4fb;--muted:#8293a7;--cyan:#43d9ff;--green:#42e6a4;--amber:#ffca55;--red:#ff5e70;--blue:#7998ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 70% -10%,#152a40 0,#070b12 44%);color:var(--text);font:13px Inter,Segoe UI,Arial,sans-serif}.app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}.side{background:#090e16;border-right:1px solid var(--line);padding:20px 14px;position:sticky;top:0;height:100vh}.brand{display:flex;gap:10px;align-items:center;padding:0 8px 24px}.logo{width:34px;height:34px;border:2px solid var(--cyan);border-radius:10px;display:grid;place-items:center;box-shadow:0 0 18px #43d9ff33}.logo:after{content:"〰";font-size:22px;color:var(--cyan)}.brand b{font-size:18px}.brand small{display:block;color:var(--muted);font-size:8px;letter-spacing:1.5px;margin-top:3px}.nav{display:grid;gap:6px}.nav button{border:0;background:transparent;color:#9dafc2;text-align:left;padding:11px;border-radius:8px;cursor:pointer}.nav button:hover,.nav button.active{background:#142131;color:#fff}.nav i{display:inline-block;width:24px;color:var(--cyan);font-style:normal}.sidefoot{position:absolute;bottom:17px;left:22px;right:22px;color:var(--muted);font-size:10px;line-height:1.55}.sidefoot b{color:var(--green)}
+main{padding:20px 24px 35px;max-width:1650px;width:100%;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.title h1{margin:0;font-size:22px}.title p{margin:5px 0 0;color:var(--muted);font-size:11px}.sys{font-size:10px;color:#b9c7d4}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);margin-right:6px}
+.locationbar{display:flex;align-items:center;gap:8px;background:#0c151f;border:1px solid #234052;padding:8px 10px;border-radius:9px;margin-bottom:11px;font-size:10px}.locationbar button{margin-left:auto;background:#112c3a;border:1px solid #2b647b;color:#dff9ff;border-radius:6px;padding:7px 10px;font-size:9px;cursor:pointer}.locationbar button:hover{background:#173c4e}.loc strong{color:#fff}.loc{color:#b8c7d6}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:10px}.metric,.card{background:rgba(13,19,29,.97);border:1px solid var(--line);border-radius:11px}.metric{padding:12px}.metric small{color:var(--muted);font-size:9px}.metric strong{display:block;font-size:24px;margin:4px 0}.goodtxt{color:var(--green);font-size:9px}.grid{display:grid;grid-template-columns:1.65fr 1fr;gap:10px}.lower{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}.card{overflow:hidden}.head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}.head b{font-size:11px}.head span{color:var(--muted);font-size:9px}.pad{padding:12px 14px}
+#map{height:410px;background:#09111a}.leaflet-container{background:#09111a}.leaflet-control-zoom a{background:#0d1822;color:#fff;border-color:#263747}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#101a25;color:#fff}.leaflet-popup-content{font-size:11px}
+.rec{border:1px solid #245166;background:linear-gradient(145deg,#0e222d,#0c171f);border-radius:9px;padding:12px;margin-bottom:9px}.tag{font-size:8px;color:var(--cyan);font-weight:800;letter-spacing:1px}.rec h3{font-size:13px;margin:6px 0}.rec p{font-size:10px;line-height:1.5;color:#b0bfcd;margin:0}.confidence{display:flex;gap:7px;align-items:center;margin-top:10px;color:var(--muted);font-size:8px}.bar{height:5px;background:#192633;border-radius:8px;flex:1}.bar i{display:block;height:100%;background:var(--cyan);border-radius:8px}.actions{display:flex;flex-wrap:wrap;gap:6px}.actions button,.btn{background:#112633;color:#dff8ff;border:1px solid #294858;border-radius:6px;padding:7px 9px;font-size:9px;cursor:pointer}.actions button:hover,.btn:hover{background:#173c4e}.filters{display:flex;gap:6px;flex-wrap:wrap}.filter{border:1px solid var(--line);background:#0e1722;color:#b8c7d6;padding:6px 8px;border-radius:6px;font-size:9px;cursor:pointer}.filter.active{border-color:#2f657b;background:#133040;color:#fff}
+.row{display:grid;grid-template-columns:34px 1fr auto;gap:9px;align-items:center;padding:10px 4px;border-bottom:1px solid #17222e}.row:last-child{border:0}.badge{width:27px;height:27px;border-radius:7px;display:grid;place-items:center;font-size:10px;font-weight:800}.b-red{background:#351821;color:#ff7784}.b-amber{background:#392d15;color:#ffd263}.b-blue{background:#132a3b;color:#6edfff}.row strong{font-size:10px}.row small{display:block;color:var(--muted);font-size:8px;margin-top:2px}.pill{font-size:8px;padding:4px 6px;border-radius:99px;background:#192532;color:#b7c6d4}.pill.red{color:#ff7e8a;background:#351821}.pill.green{color:#66e7b3;background:#103024}
+.capacity{padding:5px 14px 10px}.hrow{margin:9px 0}.hname{display:flex;justify-content:space-between;font-size:9px}.hname span{color:var(--muted)}.track{height:5px;background:#182430;border-radius:8px;margin-top:5px}.track i{display:block;height:100%;border-radius:8px}.good{background:var(--green)}.mid{background:var(--amber)}.bad{background:var(--red)}
+.table{width:100%;border-collapse:collapse;font-size:9px}.table th,.table td{padding:9px 11px;border-bottom:1px solid #17222f;text-align:left}.table th{font-size:8px;color:var(--muted)}.online{color:var(--green)}.warn{color:var(--amber)}.danger{color:var(--red)}
+.detail{display:grid;grid-template-columns:1fr 1fr;gap:10px}.detail .big{font-size:18px;font-weight:750}.kv{display:grid;grid-template-columns:110px 1fr;gap:8px;font-size:9px;padding:8px 0;border-bottom:1px solid #17222e}.kv:last-child{border:0}.kv span{color:var(--muted)}.score{font-size:24px;font-weight:800;color:var(--cyan)}.timeline{border-left:2px solid #244254;margin-left:7px;padding-left:13px}.event{position:relative;padding:0 0 14px;color:#b4c3d0;font-size:9px}.event:before{content:"";position:absolute;left:-19px;top:2px;width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 4px #43d9ff15}.event b{color:#fff;display:block;font-size:10px;margin-bottom:3px}
+.chart{height:190px;display:flex;align-items:flex-end;gap:12px;padding:15px 15px 10px;border-top:1px solid var(--line)}.barcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}.barfill{width:70%;min-height:8px;border-radius:5px 5px 0 0;background:linear-gradient(#43d9ff,#1a8199)}.barlabel{font-size:8px;color:var(--muted)}.barval{font-size:8px;color:#dce8f2}.compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}.compare>div{background:#0f1822;border:1px solid var(--line);border-radius:8px;padding:11px}.compare strong{font-size:19px;display:block;margin:5px 0}.compare span{font-size:9px;color:var(--muted)}
+.toast{position:fixed;right:20px;bottom:20px;background:#111d29;border:1px solid #31536a;border-radius:9px;padding:11px 13px;font-size:10px;opacity:0;transform:translateY(20px);transition:.25s;z-index:3000}.toast.show{opacity:1;transform:none}
+@media(max-width:1000px){.app{grid-template-columns:1fr}.side{display:none}.metrics{grid-template-columns:1fr 1fr}.grid,.lower,.detail,.compare{grid-template-columns:1fr}main{padding:13px}.sys{display:none}}
+
+.mobile-menu-btn,.mobile-nav,.mobile-nav-backdrop{display:none}
+@media(max-width:1000px){
+  .mobile-menu-btn{
+    display:grid;place-items:center;position:fixed;top:12px;left:12px;z-index:3100;
+    width:42px;height:42px;border:1px solid #294858;border-radius:9px;
+    background:#0d1822;color:#dff8ff;font-size:22px;cursor:pointer;
+    box-shadow:0 5px 20px #0008;
+  }
+  .mobile-nav{
+    display:block;position:fixed;top:0;left:0;bottom:0;width:min(285px,82vw);
+    z-index:3200;background:#090e16;border-right:1px solid var(--line);
+    padding:18px 14px;transform:translateX(-105%);transition:transform .22s ease;
+    box-shadow:12px 0 35px #0008;
+  }
+  .mobile-nav.open{transform:translateX(0)}
+  .mobile-nav-backdrop{
+    display:block;position:fixed;inset:0;z-index:3150;background:#0008;
+    opacity:0;pointer-events:none;transition:opacity .22s ease;
+  }
+  .mobile-nav-backdrop.open{opacity:1;pointer-events:auto}
+  .mobile-nav-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:4px 6px 20px;font-size:18px;
+  }
+  .mobile-nav-head button{
+    border:0;background:transparent;color:#fff;font-size:28px;cursor:pointer;
+  }
+  .mobile-nav .nav{display:grid;gap:6px}
+  .mobile-nav .nav button{
+    width:100%;font-size:13px;padding:13px 11px;
+  }
+  main{padding:68px 13px 35px}
+  .top{margin-bottom:12px}
+  .title h1{font-size:19px}
+  .title p{font-size:10px}
+  .locationbar{align-items:flex-start}
+  .locationbar button{font-size:8px;padding:7px 8px}
+  .table{min-width:680px}
+  .card:has(.table){overflow-x:auto}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+<div class="brand"><div class="logo"></div><div><b>PulseGrid</b><small>AI EMERGENCY COORDINATOR</small></div></div>
+<nav class="nav">
+<button data-view="command" class="active" onclick="showView('command',this)"><i>◈</i>Command Center</button>
+<button data-view="incidents" onclick="showView('incidents',this)"><i>!</i>Live Incidents</button>
+<button data-view="hospitals" onclick="showView('hospitals',this)"><i>+</i>Hospitals</button>
+<button data-view="units" onclick="showView('units',this)"><i>△</i>Response Units</button>
+<button data-view="comms" onclick="showView('comms',this)"><i>◉</i>Communications</button>
+<button data-view="reports" onclick="showView('reports',this)"><i>▦</i>Reports</button>
+</nav>
+<div class="sidefoot"><b>● DEMO SYSTEM ONLINE</b><br>Simulated emergency data. AI recommendations require human approval.</div>
+</aside>
+<button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-label="Open navigation">☰</button>
+<div class="mobile-nav-backdrop" id="mobileBackdrop" onclick="closeMobileMenu()"></div>
+<aside class="mobile-nav" id="mobileNav" aria-label="Mobile navigation">
+  <div class="mobile-nav-head">
+    <b>PulseGrid</b>
+    <button onclick="closeMobileMenu()" aria-label="Close navigation">×</button>
+  </div>
+  <nav class="nav">
+    <button data-view="command" class="active" onclick="mobileShowView('command',this)"><i>◈</i>Command Center</button>
+    <button data-view="incidents" onclick="mobileShowView('incidents',this)"><i>!</i>Live Incidents</button>
+    <button data-view="hospitals" onclick="mobileShowView('hospitals',this)"><i>+</i>Hospitals</button>
+    <button data-view="units" onclick="mobileShowView('units',this)"><i>△</i>Response Units</button>
+    <button data-view="comms" onclick="mobileShowView('comms',this)"><i>◉</i>Communications</button>
+    <button data-view="reports" onclick="mobileShowView('reports',this)"><i>▦</i>Reports</button>
+  </nav>
+</aside>
+<main>
+<div class="top"><div class="title"><h1 id="pageTitle">Emergency Command Center</h1><p id="pageSub">Local awareness • multi-incident coordination • predictive decision support</p></div><div class="sys"><span class="dot"></span>SYSTEM OPERATIONAL</div></div>
+
+<div class="locationbar"><span>📍</span><div class="loc" id="locationText"><strong>Location not set</strong> — use the button to center the command center around you.</div><button onclick="useLocation()">USE MY LOCATION</button></div>
+
+<div id="view"></div>
+</main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const DATA={
+ incidents:[
+  {id:'INC-204',type:'Major road collision',sev:'CRITICAL',patients:4,loc:'Local demo zone',unit:'Unit 14',eta:'6.8 min',hospital:'Hospital B',score:96,action:'Dispatch Unit 14; reserve Hospital B'},
+  {id:'INC-207',type:'Cardiac emergency',sev:'HIGH',patients:1,loc:'Local demo zone',unit:'Unit 09',eta:'7.4 min',hospital:'Hospital A',score:91,action:'Send closest advanced unit'},
+  {id:'INC-201',type:'Industrial injury',sev:'MEDIUM',patients:2,loc:'Local demo zone',unit:'Unit 03',eta:'9.2 min',hospital:'Hospital D',score:72,action:'Continue current dispatch'},
+  {id:'INC-209',type:'Medical assistance',sev:'ROUTINE',patients:1,loc:'Local demo zone',unit:'Unit 18',eta:'11.6 min',hospital:'Hospital D',score:58,action:'Maintain routine response'},
+  {id:'INC-210',type:'Fall injury',sev:'MEDIUM',patients:1,loc:'Local demo zone',unit:'Pending',eta:'—',hospital:'Pending',score:63,action:'Await unit availability'}
+ ],
+ hospitals:[
+  {name:'Hospital A',cap:87,occupied:'13 / 15',distance:'5.2 min',handoff:'9.0 min',capability:'General + Cardiac',suit:62},
+  {name:'Hospital B',cap:60,occupied:'12 / 20',distance:'7.1 min',handoff:'3.2 min',capability:'General + Trauma',suit:91},
+  {name:'Hospital C',cap:85,occupied:'17 / 20',distance:'8.4 min',handoff:'7.0 min',capability:'General',suit:65},
+  {name:'Hospital D',cap:38,occupied:'6 / 16',distance:'9.0 min',handoff:'4.8 min',capability:'General + Surgery',suit:83}
+ ],
+ units:[
+  {id:'Unit 14',type:'Advanced Ambulance',status:'DISPATCHED',task:'INC-204 collision',eta:'6.8 min',route:'North Link'},
+  {id:'Unit 09',type:'Ambulance',status:'AVAILABLE',task:'Standby',eta:'—',route:'East Corridor'},
+  {id:'Unit 18',type:'Rapid Response',status:'AVAILABLE',task:'Standby',eta:'—',route:'Central'},
+  {id:'Unit 03',type:'Ambulance',status:'EN ROUTE',task:'INC-201 injury',eta:'9.2 min',route:'Depot Bypass'},
+  {id:'Unit 21',type:'Rapid Response',status:'MAINTENANCE',task:'Service bay',eta:'—',route:'—'}
+ ]
+};
+let currentView='command',map=null,markers=null,userMarker=null,userCircle=null;
+
+function showView(view,btn){
+ currentView=view;
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+ if(btn)btn.classList.add('active');
+ const config={
+ command:['Emergency Command Center','Local awareness • multi-incident coordination • predictive decision support'],
+ incidents:['Live Incidents','AI-ranked emergency queue • priority • assignment • status'],
+ hospitals:['Hospital Network','Capacity • travel time • capability • AI suitability'],
+ units:['Response Units','Availability • assignments • ETA • coverage'],
+ comms:['Communications','Incident timelines • coordination messages • human approval'],
+ reports:['Analytics & Reports','Simulation results • performance • resource allocation']
+ }[view];
+ document.getElementById('pageTitle').textContent=config[0];document.getElementById('pageSub').textContent=config[1];
+ render();
+}
+function render(){
+ const v=document.getElementById('view');
+ if(currentView==='command')v.innerHTML=commandHTML(),initMap();
+ if(currentView==='incidents')v.innerHTML=incidentsHTML();
+ if(currentView==='hospitals')v.innerHTML=hospitalsHTML();
+ if(currentView==='units')v.innerHTML=unitsHTML();
+ if(currentView==='comms')v.innerHTML=commsHTML();
+ if(currentView==='reports')v.innerHTML=reportsHTML();
+}
+function metrics(){return `<div class="metrics">
+<div class="metric"><small>ACTIVE INCIDENTS</small><strong>07</strong><span class="goodtxt">▲ simulated live queue</span></div>
+<div class="metric"><small>AVAILABLE UNITS</small><strong>14 / 21</strong><span class="goodtxt">67% operational</span></div>
+<div class="metric"><small>AVG RESPONSE TIME</small><strong>8.4 min</strong><span class="goodtxt">▼ 18% vs baseline</span></div>
+<div class="metric"><small>HOSPITAL CAPACITY</small><strong>72%</strong><span class="goodtxt">system-wide available</span></div></div>`}
+function commandHTML(){return metrics()+`<div class="grid">
+<section class="card"><div class="head"><b>LIVE SITUATION MAP</b><span>Incidents • units • hospitals • location-aware</span></div><div id="map"></div></section>
+<section class="card"><div class="head"><b>AI COORDINATION</b><span>Human-in-the-loop</span></div><div class="pad">
+<div class="rec"><div class="tag">HIGH-PRIORITY RECOMMENDATION</div><h3>Dispatch Unit 14 → INC-204</h3><p>Highest current incident priority. Predicted arrival <b>6.8 min</b>. Use North Link to avoid congestion.</p><div class="confidence">AI CONFIDENCE <div class="bar"><i style="width:91%"></i></div>91%</div></div>
+<div class="rec"><div class="tag">HOSPITAL SELECTION</div><h3>Hospital B recommended over Hospital A</h3><p>Hospital A is closer, but its emergency department is 87% occupied. Hospital B is 60% occupied and has a faster predicted handoff.</p><div class="confidence">DECISION SCORE <div class="bar"><i style="width:88%"></i></div>88%</div></div>
+<div class="actions"><button onclick="approve('INC-204')">Approve</button><button onclick="toast('Hospital B reservation simulated.')">Reserve Hospital B</button><button onclick="toast('Alternative route generated.')">Re-route Unit 09</button></div></div></section></div>
+<div class="lower"><section class="card"><div class="head"><b>PRIORITY INCIDENTS</b><span>Open Live Incidents for full queue</span></div><div class="pad">${DATA.incidents.slice(0,4).map(incidentRow).join('')}</div></section>
+<section class="card"><div class="head"><b>HOSPITAL CAPACITY</b><span>Demo emergency data</span></div><div class="capacity">${DATA.hospitals.map(hospitalBar).join('')}</div></section></div>
+<section class="card" style="margin-top:10px"><div class="head"><b>RESPONSE UNIT STATUS</b><span>Open Response Units for full fleet</span></div><div class="pad"><table class="table">${unitTable(DATA.units.slice(0,4))}</table></div></section>`}
+function incidentRow(x,i){const cls=x.sev==='CRITICAL'||x.sev==='HIGH'?'b-red':x.sev==='MEDIUM'?'b-amber':'b-blue';return `<div class="row"><div class="badge ${cls}">${String(i+1).padStart(2,'0')}</div><div><strong>${x.type}</strong><small>${x.id} • ${x.patients} patient${x.patients>1?'s':''} • ${x.loc}</small></div><span class="pill ${x.sev==='CRITICAL'?'red':''}">${x.sev}</span></div>`}
+function hospitalBar(h){const c=h.cap>=86?'bad':h.cap>=75?'mid':'good';return `<div class="hrow"><div class="hname"><b>${h.name}</b><span>${h.occupied} occupied</span></div><div class="track"><i class="${c}" style="width:${h.cap}%"></i></div></div>`}
+function unitTable(units){return `<thead><tr><th>UNIT</th><th>TYPE</th><th>STATUS</th><th>TASK</th><th>ETA</th><th>ROUTE</th></tr></thead><tbody>${units.map(u=>`<tr><td><b>${u.id}</b></td><td>${u.type}</td><td class="${u.status==='AVAILABLE'?'online':u.status==='MAINTENANCE'?'danger':'warn'}">● ${u.status}</td><td>${u.task}</td><td>${u.eta}</td><td>${u.route}</td></tr>`).join('')}</tbody>`}
+function incidentsHTML(){return metrics()+`<section class="card"><div class="head"><b>INCIDENT QUEUE</b><div class="filters"><button class="filter active" onclick="filterIncidents('ALL',this)">ALL</button><button class="filter" onclick="filterIncidents('CRITICAL',this)">CRITICAL</button><button class="filter" onclick="filterIncidents('HIGH',this)">HIGH</button><button class="filter" onclick="filterIncidents('MEDIUM',this)">MEDIUM</button></div></div><div id="incidentRows" class="pad">${incidentCards(DATA.incidents)}</div></section>
+<section class="card" style="margin-top:10px"><div class="head"><b>INCIDENT DETAIL</b><span>Select an incident below</span></div><div id="incidentDetail" class="pad"><div class="muted">Click “Analyze” on an incident to inspect the AI recommendation.</div></div></section>`}
+function incidentCards(arr){return arr.map((x,i)=>`<div class="row" style="grid-template-columns:35px 1fr auto"><div class="badge ${x.sev==='CRITICAL'||x.sev==='HIGH'?'b-red':x.sev==='MEDIUM'?'b-amber':'b-blue'}">${String(i+1).padStart(2,'0')}</div><div><strong>${x.type}</strong><small>${x.id} • ${x.patients} patient${x.patients>1?'s':''} • Unit: ${x.unit} • ETA: ${x.eta}</small></div><div style="display:flex;gap:5px;align-items:center"><span class="pill">${x.sev}</span><button class="btn" onclick="analyzeIncident('${x.id}')">Analyze</button></div></div>`).join('')}
+function filterIncidents(level,btn){document.querySelectorAll('.filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.getElementById('incidentRows').innerHTML=incidentCards(level==='ALL'?DATA.incidents:DATA.incidents.filter(x=>x.sev===level))}
+function analyzeIncident(id){const x=DATA.incidents.find(i=>i.id===id);document.getElementById('incidentDetail').innerHTML=`<div class="detail"><div><div class="tag">INCIDENT ${x.id}</div><div class="big">${x.type}</div><div class="kv"><span>Severity</span><b>${x.sev}</b></div><div class="kv"><span>Patients</span><b>${x.patients}</b></div><div class="kv"><span>Assigned Unit</span><b>${x.unit}</b></div><div class="kv"><span>Predicted ETA</span><b>${x.eta}</b></div></div><div><div class="tag">AI PRIORITY SCORE</div><div class="score">${x.score}/100</div><p style="font-size:10px;color:#b0bfcd;line-height:1.5">${x.action}. Hospital recommendation: <b style="color:#fff">${x.hospital}</b>.</p><div class="actions"><button onclick="approve('${x.id}')">Approve recommendation</button><button onclick="toast('Coordinator override panel opened.')">Override</button></div></div></div>`}
+function hospitalsHTML(){return `<section class="card"><div class="head"><b>HOSPITAL NETWORK</b><span>Simulated capacity & routing data</span></div><div class="pad"><table class="table"><thead><tr><th>HOSPITAL</th><th>CAPACITY</th><th>TRAVEL</th><th>HANDOFF</th><th>CAPABILITY</th><th>AI SUITABILITY</th><th></th></tr></thead><tbody>${DATA.hospitals.map(h=>`<tr><td><b>${h.name}</b></td><td>${h.occupied} <span style="color:${h.cap>85?'#ff5e70':h.cap>74?'#ffca55':'#42e6a4'}">(${h.cap}%)</span></td><td>${h.distance}</td><td>${h.handoff}</td><td>${h.capability}</td><td><b style="color:${h.suit>=80?'#42e6a4':h.suit>=70?'#ffca55':'#ff7a87'}">${h.suit}/100</b></td><td><button class="btn" onclick="toast('${h.name} selected for simulated reservation.')">Reserve</button></td></tr>`).join('')}</tbody></table></div></section>
+<section class="lower"><section class="card"><div class="head"><b>WHY THE NEAREST ISN'T ALWAYS BEST</b><span>Sample decision</span></div><div class="pad"><div class="compare"><div><span>Hospital A — closer</span><strong style="color:#ff7a87">62</strong><span>5.2 min travel • 87% occupied</span></div><div><span>Hospital B — selected</span><strong style="color:#42e6a4">91</strong><span>7.1 min travel • 60% occupied • 3.2 min handoff</span></div></div><p style="font-size:10px;line-height:1.5;color:#b0bfcd;margin-bottom:0">PulseGrid weighs more than distance: capacity, capability, traffic-adjusted travel time and predicted handoff are combined into a configurable suitability score.</p></div></section>
+<section class="card"><div class="head"><b>CAPACITY ALERTS</b><span>Monitor congestion risk</span></div><div class="pad"><div class="row"><div class="badge b-red">!</div><div><strong>Hospital A approaching high occupancy</strong><small>13 of 15 occupied. Consider alternate destinations.</small></div><span class="pill red">ALERT</span></div><div class="row"><div class="badge b-blue">✓</div><div><strong>Hospital D has spare capacity</strong><small>10 available beds in simulated dataset.</small></div><span class="pill green">AVAILABLE</span></div></div></section></section>`}
+function unitsHTML(){return `<section class="card"><div class="head"><b>RESPONSE FLEET</b><span>Availability, assignment and route</span></div><div class="pad"><table class="table">${unitTable(DATA.units)}</table></div></section><section class="lower"><section class="card"><div class="head"><b>AI COVERAGE RECOMMENDATION</b><span>Proactive positioning</span></div><div class="pad"><div class="rec"><div class="tag">PREDICTIVE COVERAGE ALERT</div><h3>East Sector may have insufficient coverage</h3><p>Simulated incident density is rising while Unit 09 is the only immediately available ambulance in the eastern corridor.</p><div class="actions" style="margin-top:10px"><button onclick="toast('Unit 18 repositioning simulated.')">Reposition Unit 18</button><button onclick="toast('Coverage plan accepted.')">Accept plan</button></div></div></div></section><section class="card"><div class="head"><b>FLEET UTILIZATION</b><span>Demo telemetry</span></div><div class="pad"><div class="compare"><div><span>Available</span><strong>67%</strong><span>14 of 21</span></div><div><span>Assigned / moving</span><strong>24%</strong><span>5 of 21</span></div></div></div></section></section>`}
+function commsHTML(){return `<section class="card"><div class="head"><b>INCIDENT #INC-204 — COORDINATION TIMELINE</b><span>Human approval required</span></div><div class="pad"><div class="timeline"><div class="event"><b>19:42:01 — Incident received</b>Major collision reported. Four patients in simulated scenario.</div><div class="event"><b>19:42:04 — AI triage recommendation</b>INC-204 ranked highest priority at 96/100.</div><div class="event"><b>19:42:06 — Unit assigned</b>Unit 14 selected due to proximity and advanced ambulance capability.</div><div class="event"><b>19:42:08 — Route updated</b>North Link selected after simulated congestion detection.</div><div class="event"><b>19:42:10 — Hospital recommendation</b>Hospital B selected over closer Hospital A due to capacity and handoff factors.</div></div><div class="actions"><button onclick="approve('INC-204')">Approve & log</button><button onclick="toast('Coordinator message sent in demo.')">Send update</button><button onclick="toast('Hospital notification simulated.')">Notify hospital</button></div></div></section>
+<section class="lower"><section class="card"><div class="head"><b>COORDINATION FEED</b><span>Simulated messages</span></div><div class="pad"><div class="row"><div class="badge b-blue">AI</div><div><strong>PulseGrid</strong><small>Recommend Unit 14 → INC-204; Hospital B preferred.</small></div><span class="pill">19:42</span></div><div class="row"><div class="badge b-amber">U14</div><div><strong>Unit 14</strong><small>En route via North Link. ETA 6.8 min.</small></div><span class="pill">19:42</span></div><div class="row"><div class="badge b-blue">HB</div><div><strong>Hospital B</strong><small>Simulated reservation slot available.</small></div><span class="pill">19:43</span></div></div></section>
+<section class="card"><div class="head"><b>SAFETY / GOVERNANCE</b><span>Prototype policy</span></div><div class="pad"><p style="font-size:10px;color:#b0bfcd;line-height:1.6;margin:0">PulseGrid provides <b style="color:#fff">recommendations, not autonomous emergency decisions</b>. Real deployment would require validated data, clinical/dispatch review, security controls, auditing and formal safety testing.</p></div></section></section>`}
+function reportsHTML(){return `<div class="metrics"><div class="metric"><small>SIMULATED CASES</small><strong>10,000</strong><span class="goodtxt">benchmark scenarios</span></div><div class="metric"><small>BASELINE AVG RESPONSE</small><strong>9.8 min</strong><span>nearest-first method</span></div><div class="metric"><small>PULSEGRID AVG RESPONSE</small><strong>8.1 min</strong><span class="goodtxt">simulated improvement</span></div><div class="metric"><small>CAPACITY OVERLOADS</small><strong>12</strong><span class="goodtxt">vs 34 baseline</span></div></div>
+<section class="card"><div class="head"><b>RESPONSE-TIME COMPARISON</b><span>Illustrative simulated benchmark</span></div><div class="chart"><div class="barcol"><span class="barval">9.8m</span><div class="barfill" style="height:85%"></div><span class="barlabel">Nearest-first</span></div><div class="barcol"><span class="barval">8.9m</span><div class="barfill" style="height:74%"></div><span class="barlabel">Traffic-aware</span></div><div class="barcol"><span class="barval">8.1m</span><div class="barfill" style="height:67%"></div><span class="barlabel">PulseGrid</span></div></div></section>
+<section class="lower"><section class="card"><div class="head"><b>ALLOCATION OUTCOME</b><span>Illustrative simulation</span></div><div class="pad"><div class="compare"><div><span>Baseline overload events</span><strong style="color:#ff7a87">34</strong><span>Hospital capacity exceeded during dispatch.</span></div><div><span>PulseGrid overload events</span><strong style="color:#42e6a4">12</strong><span>Capacity-aware selection reduced simulated overloads.</span></div></div></div></section><section class="card"><div class="head"><b>MODEL FACTORS</b><span>Configurable prototype weights</span></div><div class="pad"><div class="kv"><span>Travel time</span><b>35%</b></div><div class="kv"><span>Medical capability</span><b>25%</b></div><div class="kv"><span>Capacity</span><b>20%</b></div><div class="kv"><span>Traffic</span><b>15%</b></div><div class="kv"><span>Handoff</span><b>5%</b></div></div></section></section>
+<section class="card" style="margin-top:10px"><div class="head"><b>INTERPRETING THE RESULTS</b><span>Competition note</span></div><div class="pad"><p style="font-size:10px;line-height:1.6;color:#b0bfcd;margin:0">These numbers are <b style="color:#fff">simulated demonstration results</b>, not evidence of real-world clinical effectiveness. Before deployment, the model would need representative operational data, validation with emergency professionals, bias/safety testing and controlled trials.</p></div></section>`}
+
+function initMap(){
+ setTimeout(()=>{
+  const el=document.getElementById('map'); if(!el)return;
+  if(map){map.remove();map=null}
+  map=L.map(el).setView([3.139,101.686],12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+  markers=L.layerGroup().addTo(map); drawDemoPoints(3.139,101.686);
+ },30);
+}
+function drawDemoPoints(lat,lng){
+ markers.clearLayers();
+ const pts=[
+ [lat+.018,lng-.025,'#ff5e70','!','Critical collision — INC-204'],
+ [lat-.012,lng+.020,'#ff5e70','!','Cardiac emergency — INC-207'],
+ [lat+.030,lng+.012,'#43d9ff','14','Unit 14 — dispatched'],
+ [lat-.026,lng-.006,'#43d9ff','09','Unit 09 — available'],
+ [lat+.004,lng+.004,'#43d9ff','18','Unit 18 — available']
+ ];
+ pts.forEach(p=>marker(...p));
+ DATA.hospitals.forEach((h,i)=>{const coords=[[3.157,101.711],[3.121,101.689],[3.169,101.651],[3.107,101.728]][i];marker(coords[0],coords[1],'#42e6a4','H',`${h.name}<br>${h.cap}% occupied`);});
+}
+function marker(lat,lng,color,label,title){const icon=L.divIcon({className:'',html:`<div style="width:25px;height:25px;border-radius:50%;background:${color};color:#061019;display:grid;place-items:center;font-weight:800;font-size:9px;box-shadow:0 0 0 6px ${color}22">${label}</div>`,iconSize:[25,25],iconAnchor:[12,12]});L.marker([lat,lng],{icon}).bindPopup(title).addTo(markers)}
+function useLocation(){
+ if(!navigator.geolocation){toast('Geolocation is not available.');return}
+ document.getElementById('locationText').innerHTML='<strong>Locating…</strong> requesting browser permission.';
+ navigator.geolocation.getCurrentPosition(pos=>{
+  const lat=pos.coords.latitude,lng=pos.coords.longitude;
+  if(currentView!=='command'){showView('command',document.querySelector('[data-view="command"]'))}
+  setTimeout(()=>{if(map){map.setView([lat,lng],14);if(userMarker)map.removeLayer(userMarker);if(userCircle)map.removeLayer(userCircle);userMarker=L.marker([lat,lng]).addTo(map).bindPopup('<b>PulseGrid operating location</b><br>Location is used to center this prototype.').openPopup();userCircle=L.circle([lat,lng],{radius:Math.min(pos.coords.accuracy||100,500),color:'#43d9ff',fillColor:'#43d9ff',fillOpacity:.1,weight:1}).addTo(map);drawDemoPoints(lat,lng)}},60);
+  document.getElementById('locationText').innerHTML='<strong>Local operating area detected</strong> — command map centered on your location.';
+  toast('Location enabled. PulseGrid map centered.');
+ },()=>{document.getElementById('locationText').innerHTML='<strong>Location unavailable</strong> — permission may have been denied or this page needs HTTPS/localhost.';toast('Could not access location.')},{enableHighAccuracy:true,timeout:10000,maximumAge:60000});
+}
+function approve(id){toast(`${id}: recommendation acknowledged and logged for demo.`)}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.tt);window.tt=setTimeout(()=>t.classList.remove('show'),2600)}
+
+function toggleMobileMenu(){
+  document.getElementById('mobileNav').classList.toggle('open');
+  document.getElementById('mobileBackdrop').classList.toggle('open');
+}
+function closeMobileMenu(){
+  document.getElementById('mobileNav').classList.remove('open');
+  document.getElementById('mobileBackdrop').classList.remove('open');
+}
+function mobileShowView(view,btn){
+  const desktopBtn=document.querySelector('.side .nav button[data-view="'+view+'"]');
+  showView(view,desktopBtn);
+  document.querySelectorAll('.mobile-nav .nav button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  closeMobileMenu();
+}
+render();
+</script>
+</body></html>
